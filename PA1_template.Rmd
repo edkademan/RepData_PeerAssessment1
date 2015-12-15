@@ -131,3 +131,26 @@ steps_histogram(spdi)
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+We have separated out the work of creating the weekday/weekend factor
+into a discreet function. The plotting routine calls it before finding
+the average number of steps per interval. As before we turn the
+interval into a timestamp.
+
+```{r}
+create_daytype <- function(d) {
+  r <- rep("weekend", length(d))
+  r[is.na(match(weekdays(d), c("Saturday", "Sunday")))] <- "weekday"
+  factor(r)}
+  
+daytype_plot <- function(imp = imputed_data()) {
+  api <- data.frame(imp, daytype = create_daytype(imp$date)) %>%
+    group_by(daytype, interval) %>%
+    summarise(steps = mean(steps))
+  interval_plot(api) + facet_grid(daytype ~ .)}
+```
+
+Here is the resulting plot on the imputed data:
+```{r echo = FALSE}
+daytype_plot(imp)
+```
