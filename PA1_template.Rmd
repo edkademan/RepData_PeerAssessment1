@@ -27,7 +27,7 @@ act <- act_data()
 ## What is mean total number of steps taken per day?
 
 ```{r}
-steps_per_day <- function(act = act_data(), na.rm = FALSE)
+steps_per_day <- function(act = act_data(), na.rm = TRUE)
   act %>%
     group_by(date) %>%
     summarise(steps = sum(steps, na.rm = na.rm))
@@ -94,7 +94,8 @@ interval_plot(api)
 ## Imputing missing values
 
 The `summary` function shows that the only missing values are `steps`
-values and that the total number of them is `r sum(is.na(act$steps))`
+values and that the total number of them is
+`r sum(is.na(act$steps))`.
 
 ```{r}
 summary(act)
@@ -107,7 +108,7 @@ it sets that value to the average number of steps for that interval.
 ```{r}
 imputed_data <- function(act = act_data(),
                          api = avg_per_interval(act)) { 
-  i <- is.na(act$steps)
+  i            <- is.na(act$steps)
   act$steps[i] <- api$steps[match(act$interval[i], api$interval)]
   act}
 
@@ -116,12 +117,12 @@ imputed_data <- function(act = act_data(),
 ```
 
  - The mean number of steps per day with imputation is:
-   `r f(mean(spdi$steps, na.rm = TRUE))`
+   `r f(mean(spdi$steps, na.rm = TRUE))`.
    (It had been
    `r f(mean(spd$steps, na.rm = TRUE))`
    without imputation.)
  - The median number of steps per day with imputation is:
-   `r f(median(spdi$steps, na.rm = TRUE))`
+   `r f(median(spdi$steps, na.rm = TRUE))`.
    (It had been
    `r f(median(spd$steps, na.rm = TRUE))`.)
 
@@ -129,6 +130,10 @@ The histogram of imputed steps per day looks as follows:
 ```{r echo = FALSE}
 steps_histogram(spdi)
 ```
+
+Under the imputed regime the estimates of the total daily number of
+steps increases because now we are counting the imputed values in
+addition to the real ones.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
