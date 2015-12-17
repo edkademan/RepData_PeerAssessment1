@@ -36,15 +36,15 @@ steps_histogram <- function(spd = steps_per_day(), binwidth = 1000)
   ggplot(spd) +
     geom_histogram(aes(steps), binwidth = binwidth)
 
-spd <- steps_per_day(act)
+spd        <- steps_per_day(act)
+mean_spd   <- mean(spd$steps, na.rm = TRUE)
+median_spd <- median(spd$steps, na.rm = TRUE)
 ````
 
 After counting the number of steps in each day we find
 
- - mean number of steps per day:
-   `r f(mean(spd$steps, na.rm = TRUE))`
- - median number of steps per day:
-   `r f(median(spd$steps, na.rm = TRUE))`
+ - mean number of steps per day: `r f(mean_spd)`
+ - median number of steps per day: `r f(median_spd)`
 
 The histogram of steps per day looks as follows:
 ```{r echo = FALSE}
@@ -61,11 +61,12 @@ avg_per_interval <- function(act = act_data(), na.rm = TRUE)
     group_by(interval) %>%
     summarise(steps = mean(steps, na.rm = na.rm))
 
-api <- avg_per_interval(act)
+api     <- avg_per_interval(act)
+max_int <- api$interval[which.max(api$steps)]
 ```
 
 The interval with the greatest average number of steps is
-`r api$interval[which.max(api$steps)]`.
+`r max_int`.
 
 Now the `interval` variable is an integer that identifies the starting
 minute of the day for a 5-minute interval. It is of the form hhmm
@@ -76,9 +77,9 @@ like a time stamp so that when we plot the step averages as a function
 of time equal horizontal displacements correspond to equal time
 increments.
 
-If we had just used `interval` directly then the
+If we had just used `interval` directly then for example the
 difference between 50 and 55 would be 5---as it should be---but the
-difference between 55 and 100 would be 45---when it should be 5.
+difference between 55 and 100 would be 45---when it should also be 5.
 
 ```{r}
 interval_to_hour <- function(i) (i %/% 100) + (i %% 100)/60
@@ -94,8 +95,7 @@ interval_plot(api)
 ## Imputing missing values
 
 The `summary` function shows that the only missing values are `steps`
-values and that the total number of them is
-`r sum(is.na(act$steps))`.
+values and that there are `r sum(is.na(act$steps))` of them.
 
 ```{r}
 summary(act)
@@ -112,19 +112,16 @@ imputed_data <- function(act = act_data(),
   act$steps[i] <- api$steps[match(act$interval[i], api$interval)]
   act}
 
-  imp  <- imputed_data(act, api)
-  spdi <- steps_per_day(imp)
+imp         <- imputed_data(act, api)
+spdi        <- steps_per_day(imp)
+mean_spdi   <- mean(spdi$steps, na.rm = TRUE)
+median_spdi <- median(spdi$steps, na.rm = TRUE)
 ```
 
  - The mean number of steps per day with imputation is:
-   `r f(mean(spdi$steps, na.rm = TRUE))`.
-   (It had been
-   `r f(mean(spd$steps, na.rm = TRUE))`
-   without imputation.)
+   `r f(mean_spdi)`. (It had been `r f(mean_spd)` without imputation.)
  - The median number of steps per day with imputation is:
-   `r f(median(spdi$steps, na.rm = TRUE))`.
-   (It had been
-   `r f(median(spd$steps, na.rm = TRUE))`.)
+   `r f(median_spdi)`. (It had been `r f(median_spd)`.)
 
 The histogram of imputed steps per day looks as follows:
 ```{r echo = FALSE}
@@ -143,7 +140,7 @@ the average number of steps per interval. As before we turn the
 interval into a timestamp.
 
 ```{r}
-create_daytype <- function(d) {
+create_daytype <- function(d) {    # argument d is a date
   r <- rep("weekend", length(d))
   r[is.na(match(weekdays(d), c("Saturday", "Sunday")))] <- "weekday"
   factor(r)}
