@@ -26,11 +26,16 @@ act <- act_data()
 
 ## What is mean total number of steps taken per day?
 
+Calculate the total number of steps in each day, but ignore those days
+for which all the step values are missing.
+
 ```{r}
-steps_per_day <- function(act = act_data(), na.rm = TRUE)
+steps_per_day <- function(act = act_data(), na.rm = TRUE) {
+  sum_or_NA <- function(x)
+                 if(all(is.na(x))) NA else sum(x, na.rm = na.rm)
   act %>%
     group_by(date) %>%
-    summarise(steps = sum(steps, na.rm = na.rm))
+    summarise(steps = sum_or_NA(steps))}
 
 steps_histogram <- function(spd = steps_per_day(), binwidth = 1000)
   ggplot(spd) +
@@ -129,8 +134,8 @@ steps_histogram(spdi)
 ```
 
 Under the imputed regime the estimates of the total daily number of
-steps increases because now we are counting the imputed values in
-addition to the real ones.
+steps cannot decrease because now we are counting the imputed values
+in addition to the real ones.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
